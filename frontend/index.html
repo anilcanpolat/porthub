@@ -1,21 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PortHub</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="icon.png"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <header>
-    <h1>⚓ PortHub</h1>
-    <p>Your self-hosted service dashboard</p>
-  </header>
 
-  <main>
-    <section id="devices"></section>
-  </main>
+<header>
+  <span class="logo"><img src="icon.png" alt="logo"/>PortHub</span>
+  <div class="header-actions">
+    <a href="https://buymeacoffee.com" target="_blank" class="bmc-btn">Buy me a coffee</a>
+    <button id="settingsBtn"><img src="settings-outline.svg" alt="settings"/></button>
+    <button id="themeBtn"><img src="dark-mode.svg" alt="theme"/></button>
+    <button id="refreshBtn"><img src="refresh.svg" alt="refresh"/></button>
+  </div>
+</header>
 
-  <script src="app.js"></script>
+<div id="settingsPanel" class="settings-panel hidden">
+  <h4>Settings</h4>
+  <label>Refresh interval (seconds)
+    <input type="number" id="refreshInput" min="5" value="30"/>
+  </label>
+  <button id="settingsSave">Save</button>
+
+  <hr class="settings-divider"/>
+  <h4>Hidden Devices</h4>
+  <div id="hiddenDevList" class="hidden-list"></div>
+  <button class="restore-all-btn" onclick="restoreAll('dev')">Restore All Devices</button>
+
+  <hr class="settings-divider"/>
+  <h4>Hidden Services</h4>
+  <div id="hiddenSvcList" class="hidden-list"></div>
+  <button class="restore-all-btn" onclick="restoreAll('svc')">Restore All Services</button>
+</div>
+
+<div id="canvas">
+  <svg id="lines"></svg>
+</div>
+
+<div id="overlay" class="hidden"></div>
+<div id="editModal" class="hidden">
+  <h3>Edit</h3>
+  <div id="editDevName" class="hidden">
+    <label>Device Name<input type="text" id="editDevNameInput" placeholder="Custom name"/></label>
+  </div>
+  <div id="editSvcFields">
+    <label>Label<input type="text" id="editLabel" placeholder="Service name"/></label>
+    <label>Port<input type="number" id="editPort" placeholder="Port number"/></label>
+    <label>URL Override<input type="text" id="editUrl" placeholder="Leave blank for auto"/></label>
+  </div>
+  <div class="modal-actions">
+    <button id="editCancel">Cancel</button>
+    <button id="editSave" class="primary">Save</button>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+<script src="app.js"></script>
 </body>
 </html>

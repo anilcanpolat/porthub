@@ -1,45 +1,32 @@
-from flask import Flask, jsonify, send_from_directory
-from scanner import scan_ports
-from docker_watcher import get_docker_services
-from systemctl_watcher import get_systemctl_services
-from network import get_interfaces
-import os
+import socket
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-app = Flask(__name__, static_folder='../frontend')
+COMMON_PORTS = [
+    21,22,23,25,53,80,81,443,445,
+    3000,3001,3306,5000,5432,5900,
+    6767,6881,7878,8080,8096,8191,
+    8443,8888,8920,8923,8989,9090,
+    9696,9999,1883,1337,5055,7359,
+    8099,999,7777,8923,22
+]
 
-@app.route('/')
-def index():
-    return send_from_directory('../frontend', 'index.html')
+def _check(ip, port, timeout=0.3):
+    try:
+        s = socket.socket()
+        s.settimeout(timeout)
+        r = s.connect_ex((ip, port))
+        s.close()
+        return port if r == 0 else None
+    except:
+        return None
 
-@app.route('/api/services')
-def services():
-    result = {}
-
-    interfaces = get_interfaces()
-
-    for iface, ip in interfaces.items():
-        services = []
-
-        # Docker
-        for svc in get_docker_services():
-            services.append(svc)
-
-        # Systemctl
-        for svc in get_systemctl_services():
-            services.append(svc)
-
-        # Port scan
-        for port in scan_ports(ip):
-            services.append({
-                'port': port,
-                'label': 'Unknown',
-                'source': 'port-scan'
-            })
-
-        if services:
-            result[ip] = services
-
-    return jsonify(result)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000, debug=False)
+def scan_ports(ip, ports=None):
+    targets = ports or COMMON_PORTS
+    open_ports = []
+    with ThreadPoolExecutor(max_workers=50) as ex:
+        futures = {ex.submit(_check, ip, p): p for p in targets}
+        for f in as_completed(futures):
+            r = f.result()
+            if r:
+                open_ports.append(r)
+    return open_ports

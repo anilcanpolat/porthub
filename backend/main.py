@@ -1,45 +1,58 @@
-from flask import Flask, jsonify, send_from_directory
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from scanner import scan_ports
 from docker_watcher import get_docker_services
 from systemctl_watcher import get_systemctl_services
 from network import get_interfaces
-import os
+import socket, os
 
-app = Flask(__name__, static_folder='../frontend')
+FRONTEND = os.path.join(os.path.dirname(__file__), '../frontend')
+app = FastAPI()
 
-@app.route('/')
-def index():
-    return send_from_directory('../frontend', 'index.html')
-
-@app.route('/api/services')
+@app.get('/api/services')
 def services():
-    result = {}
+    result   = {}
+    docker_svcs   = get_docker_services()
+    systemctl_svcs = get_systemctl_services()
 
-    interfaces = get_interfaces()
+    for ip, meta in get_interfaces().items():
+        seen_ports = set()
+        svcs = []
 
-    for iface, ip in interfaces.items():
-        services = []
+        for svc in docker_svcs + systemctl_svcs:
+            if svc['port'] not in seen_ports:
+                seen_ports.add(svc['port'])
+                svcs.append(svc)
 
-        # Docker
-        for svc in get_docker_services():
-            services.append(svc)
-
-        # Systemctl
-        for svc in get_systemctl_services():
-            services.append(svc)
-
-        # Port scan
         for port in scan_ports(ip):
-            services.append({
-                'port': port,
-                'label': 'Unknown',
-                'source': 'port-scan'
-            })
+            if port not in seen_ports:
+                seen_ports.add(port)
+                svcs.append({'port': port, 'label': 'Unknown', 'source': 'port-scan'})
 
-        if services:
-            result[ip] = services
+        result[ip] = {
+            'iface':    meta['iface'],
+            'mac':      meta['mac'],
+            'aliases':  meta['aliases'],
+            'services': svcs
+        }
+    return result
 
-    return jsonify(result)
+@app.post('/api/check')
+async def check_port(request: Request):
+    data = await request.json()
+    host = data.get('host', '127.0.0.1')
+    port = int(data.get('port', 0))
+    try:
+        s = socket.socket()
+        s.settimeout(0.5)
+        r = s.connect_ex((host, port))
+        s.close()
+        return {'open': r == 0}
+    except Exception:
+        return {'open': False}
+
+app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='static')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=7777, debug=False)
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=7777)
