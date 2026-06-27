@@ -1,0 +1,22 @@
+porthub:
+  port: 3000
+  scan_interval: 30  # seconds between scans
+
+network:
+  scan_localhost: true
+  scan_interfaces: true   # scan all network interfaces
+  ignored_ports:          # ports to never show
+    - 22
+    - 53
+  extra_ranges:           # manually added IP ranges to scan
+    # - 192.168.1.0/24
+
+devices:
+  manual:                 # manually added devices
+    # - ip: 192.168.1.50
+    #   label: "Windows Bot Laptop"
+    #   ports: [8080, 3000]
+
+agent:
+  enabled: true
+  secret: "changeme"      # shared secret between agent and hub
