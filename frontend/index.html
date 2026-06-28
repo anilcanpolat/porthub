@@ -25,6 +25,12 @@
     <input type="number" id="refreshInput" min="5" value="30"/>
   </label>
   <button id="settingsSave">Save</button>
+        <hr class="settings-divider"/>
+        <h4>Add Device</h4>
+        <label>IP Address<input id="manualIp" type="text" placeholder="192.168.1.100"/></label>
+        <label>Name (optional)<input id="manualName" type="text" placeholder="My NAS"/></label>
+        <button id="addDeviceBtn" style="background:var(--accent);color:#111;border:none;padding:7px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Device</button>
+        <div id="manualDevList"></div>
 
   <hr class="settings-divider"/>
   <h4>Hidden Devices</h4>
