@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PortHub</title>
+  <link rel="icon" type="image/png" href="icon.png"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header>
+  <span class="logo"><img src="icon.png" alt="logo"/>PortHub</span>
+  <div class="header-actions">
+    <a href="https://ko-fi.com/anilcanpolat" target="_blank" class="bmc-btn">Support me</a>
+    <button id="settingsBtn"><img src="settings-outline.svg" alt="settings"/></button>
+    <button id="themeBtn"><img src="dark-mode.svg" alt="theme"/></button>
+    <button id="refreshBtn"><img src="refresh.svg" alt="refresh"/></button>
+  </div>
+</header>
+
+<div id="settingsPanel" class="settings-panel hidden">
+  <h4>Settings</h4>
+  <label>Refresh interval (seconds)
+    <input type="number" id="refreshInput" min="5" value="30"/>
+  </label>
+  <button id="settingsSave">Save</button>
+        <hr class="settings-divider"/>
+        <h4>Add Device</h4>
+        <label>IP Address<input id="manualIp" type="text" placeholder="192.168.1.100"/></label>
+        <label>Name (optional)<input id="manualName" type="text" placeholder="My NAS"/></label>
+        <button id="addDeviceBtn" style="background:var(--accent);color:#111;border:none;padding:7px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Device</button>
+        <div id="manualDevList"></div>
+
+  <hr class="settings-divider"/>
+  <h4>Hidden Devices</h4>
+  <div id="hiddenDevList" class="hidden-list"></div>
+  <button class="restore-all-btn" onclick="restoreAll('dev')">Restore All Devices</button>
+
+  <hr class="settings-divider"/>
+  <h4>Hidden Services</h4>
+  <div id="hiddenSvcList" class="hidden-list"></div>
+  <button class="restore-all-btn" onclick="restoreAll('svc')">Restore All Services</button>
+</div>
+
+<div id="canvas">
+  <svg id="lines"></svg>
+</div>
+
+<div id="overlay" class="hidden"></div>
+<div id="editModal" class="hidden">
+  <h3>Edit</h3>
+  <div id="editDevName" class="hidden">
+    <label>Device Name<input type="text" id="editDevNameInput" placeholder="Custom name"/></label>
+  </div>
+  <div id="editSvcFields">
+    <label>Label<input type="text" id="editLabel" placeholder="Service name"/></label>
+    <label>Port<input type="number" id="editPort" placeholder="Port number"/></label>
+    <label>URL Override<input type="text" id="editUrl" placeholder="Leave blank for auto"/></label>
+  </div>
+  <div class="modal-actions">
+    <button id="editCancel">Cancel</button>
+    <button id="editSave" class="primary">Save</button>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+<script src="app.js"></script>
+</body>
+</html>
