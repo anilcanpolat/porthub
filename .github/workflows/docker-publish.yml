@@ -1,9 +1,8 @@
-name: Build and Push Docker Image
+name: Build and Publish Docker Image
 
 on:
   push:
     branches: [main]
-    tags: ['v*']
 
 jobs:
   build-and-push:
@@ -11,8 +10,16 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -25,7 +32,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/anilcanpolat/porthub:latest
+            ghcr.io/anilcanpolat/porthub:${{ github.sha }}
